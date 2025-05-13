@@ -34,6 +34,7 @@
 # grpcio==1.72.0rc1
 # grpcio-status==1.72.0rc1
 # h11==0.16.0
+hf_xet
 # httpcore==1.0.9
 # httpx==0.28.1
 # httpx-sse==0.4.0
@@ -43,12 +44,14 @@
 # ipykernel @ file:///D:/bld/ipykernel_1719845595208/work
 # ipython @ file:///D:/bld/bld/rattler-build_ipython_1745672185/work
 # ipython_pygments_lexers @ file:///home/conda/feedstock_root/build_artifacts/ipython_pygments_lexers_1737123620466/work
+ipywidgets
 # jedi @ file:///home/conda/feedstock_root/build_artifacts/jedi_1733300866624/work
 # Jinja2==3.1.6
 # jiter==0.9.0
 # joblib==1.4.2
 # jsonpatch==1.33
 # jsonpointer==3.0.0
+jupyter
 # jupyter_client @ file:///home/conda/feedstock_root/build_artifacts/jupyter_client_1733440914442/work
 # jupyter_core @ file:///D:/bld/jupyter_core_1727163532151/work
 langchain==0.3.24
@@ -56,7 +59,7 @@ langchain==0.3.24
 langchain-community==0.3.23
 langchain-core==0.3.57
 # langchain-google-genai==2.1.4
-langchain-openai==0.3.15
+langchain-huggingface
 # langchain-text-splitters==0.3.8
 # langserve==0.3.1
 # langsmith==0.3.40
