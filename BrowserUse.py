@@ -14,8 +14,18 @@ llm = ChatDeepSeek(
 )"""
 
 from langchain_openai import ChatOpenAI
-from browser_use import Agent
+from browser_use import Agent,Browser
+from browser_use import BrowserConfig
+from browser_use.browser.context import BrowserContext
 import asyncio
+
+# Basic configuration
+config = BrowserConfig(
+    headless=False,
+    disable_security=False
+)
+
+browser = Browser(config=config)
 
 # dotenv
 load_dotenv()
@@ -27,9 +37,10 @@ llm=ChatOpenAI(base_url=os.getenv("DEEPSEEK_BASE_URL"),
                   )
 
 async def run_search():
-	agent = Agent(
+    agent = Agent(
 		task=(	'1. 打开 https://www.dianping.com/'
-		    "2.登录账号"
+		        '2. 使用以下登录凭证登录：\n'
+            f'Authorization: Bearer {os.getenv("DIANPING_TOKEN")}\n'
             '3. 把地址转到当前Ip的区域'
 			'4. 点击美食模块'
 			"5. 在搜索框中搜索 '肯德基'，按好评降序排列搜索结果 "
@@ -37,11 +48,12 @@ async def run_search():
             "7. 返回这个店铺的所有评论"
 		),
 		llm=llm,
-		use_vision=False,
+		browser=browser,#重用浏览器实例
+		use_vision=False,#使用没有视觉支持的模型时禁用
+        save_conversation_path="logs/conversation"  #Save chat logs调试用
 	)
-
-	await agent.run()
-
+    await agent.run()
+    await browser.close()#记得手动关闭浏览器
 
 if __name__ == '__main__':
 	asyncio.run(run_search())
