@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react'
 import { Button } from "@/components/ui/button"
 import { Facebook, Linkedin, Youtube, Instagram } from 'lucide-react'
 import { useState } from "react"
@@ -309,17 +310,17 @@ export default function PreferencesPage() {
           <div className="max-w-2xl space-y-8">
             <TextareaField 
               label="有什么是您绝对不能吃的东西？" 
-              description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如"糖尿病"等"
+              description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
             />
             
             <TextareaField 
               label="您喜欢吃什么？" 
-              description="您可以写菜品或食物名称，如"披萨"等；您也可以写具体菜系类型，如"川菜"等；您也可以写口味偏好，如"清淡的东西"等。写什么都可以！"
+              description="您可以写菜品或食物名称，如&quot;披萨&quot;等；您也可以写具体菜系类型，如&quot;川菜&quot;等；您也可以写口味偏好，如&quot;清淡的东西&quot;等。写什么都可以！"
             />
             
             <TextareaField 
               label="您讨厌吃什么？" 
-              description="您可以写菜品或食物名称，如"香菜"等；您也可以写具体菜系类型或者是口味偏好，如"重油重盐的东西"等。写什么都可以！"
+              description="您可以写菜品或食物名称，如&quot;香菜&quot;等；您也可以写具体菜系类型或者是口味偏好，如&quot;重油重盐的东西&quot;等。写什么都可以！"
             />
             
             <RatingSlider label="您对辣味的接受程度？" />
