@@ -26,7 +26,7 @@ pnpm install
 ## 运行开发服务器
 输入以下命令行命令：
 ```bash
-pnpm install
+pnpm dev
 ```
 这个命令会启动一个本地开发服务器，通常在 http://localhost:3000 上运行。
 打开浏览器，访问：http://localhost:3000 即可看到网页。
