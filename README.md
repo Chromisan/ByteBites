@@ -30,6 +30,8 @@ pnpm dev
 ```
 这个命令会启动一个本地开发服务器，通常在 http://localhost:3000 上运行。
 打开浏览器，访问：http://localhost:3000 即可看到网页。
+如果想取消进程，在命令行中输入：
+Stop-Process -Name "node" -Force
 
 > 注：若报错Module not found: Can't resolve '@/lib/utils'
 表示项目的根目录下缺少了 lib/utils.ts 文件。

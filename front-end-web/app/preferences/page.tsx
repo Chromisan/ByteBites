@@ -263,7 +263,7 @@ export default function PreferencesPage() {
           <section className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您所期望的餐厅人均消费为多少？</h2>
             
-            <div className="max-w-2xl">
+            <div className="w-full max-w-2xl mx-auto">
               <PriceRangeSlider label="人均消费范围" />
             </div>
           </section>
@@ -272,7 +272,7 @@ export default function PreferencesPage() {
           <section className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您在选择就餐地点时对以下各项的重视或敏感程度？</h2>
             
-            <div className="max-w-2xl space-y-5">
+            <div className="w-full max-w-2xl mx-auto">
               <RatingSlider label="性价比" />
               
               <RatingSlider 
@@ -305,7 +305,7 @@ export default function PreferencesPage() {
           <section className="mb-16">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您对菜品类型、口味的偏好？</h2>
             
-            <div className="max-w-2xl space-y-8">
+            <div className="w-full max-w-2xl mx-auto">
               <TextareaField 
                 label="有什么是您绝对不能吃的东西？" 
                 description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
