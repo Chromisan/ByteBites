@@ -267,6 +267,14 @@ export default function PreferencesPage() {
               <PriceRangeSlider label="人均消费范围" />
             </div>
           </section>
+        {/* Task 1: Price Range */}
+        <section className="mb-16">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您所期望的餐厅人均消费为多少？</h2>
+          
+          <div className="w-full max-w-2xl mx-auto">
+            <PriceRangeSlider label="人均消费范围" />
+          </div>
+        </section>
 
           {/* Task 2: Rating Preferences */}
           <section className="mb-16">
@@ -300,6 +308,38 @@ export default function PreferencesPage() {
               <RatingSlider label="菜品热量 & 营养成分" />
             </div>
           </section>
+        {/* Task 2: Rating Preferences */}
+        <section className="mb-16">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您在选择就餐地点时对以下各项的重视或敏感程度？</h2>
+          
+          <div className="w-full max-w-2xl mx-auto">
+            <RatingSlider label="性价比" />
+            
+            <RatingSlider 
+              label="卫生情况" 
+              description="如餐厨具卫生程度、食材新鲜程度、是否公示食品安全信息等" 
+            />
+            
+            <RatingSlider label="用餐环境" />
+            
+            <RatingSlider label="餐厅距离 & 交通便利程度" />
+            
+            <RatingSlider label="排队等位时间 & 上菜速度" />
+            
+            <RatingSlider 
+              label="在美食推荐平台上的综合评分高低" 
+              description="如大众点评等" 
+            />
+            
+            <RatingSlider label="餐厅服务" />
+            
+            <RatingSlider label="菜品口味" />
+            
+            <RatingSlider label="菜品健康程度" />
+            
+            <RatingSlider label="菜品热量 & 营养成分" />
+          </div>
+        </section>
 
           {/* Task 3: Food Preferences */}
           <section className="mb-16">
@@ -325,6 +365,30 @@ export default function PreferencesPage() {
             </div>
           </section>
         </main>
+        {/* Task 3: Food Preferences */}
+        <section className="mb-16">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您对菜品类型、口味的偏好？</h2>
+          
+          <div className="w-full max-w-2xl mx-auto">
+            <TextareaField 
+              label="有什么是您绝对不能吃的东西？" 
+              description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
+            />
+            
+            <TextareaField 
+              label="您喜欢吃什么？" 
+              description="您可以写菜品或食物名称，如&quot;披萨&quot;等；您也可以写具体菜系类型，如&quot;川菜&quot;等；您也可以写口味偏好，如&quot;清淡的东西&quot;等。写什么都可以！"
+            />
+            
+            <TextareaField 
+              label="您讨厌吃什么？" 
+              description="您可以写菜品或食物名称，如&quot;香菜&quot;等；您也可以写具体菜系类型或者是口味偏好，如&quot;重油重盐的东西&quot;等。写什么都可以！"
+            />
+            
+            <RatingSlider label="您对辣味的接受程度？" />
+          </div>
+        </section>
+      </main>
 
         {/* Footer */}
         <footer className="bg-gray-50 py-12 px-6 mt-20">
