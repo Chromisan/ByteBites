@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Facebook, Linkedin, Youtube, Instagram } from 'lucide-react'
 import { useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
+import { useRouter } from 'next/navigation'
 
 // Custom Slider Component
 function PriceRangeSlider({ label }: { label: string }) {
@@ -235,133 +236,131 @@ function TextareaField({ label, description, defaultValue = "无" }: {
 }
 
 export default function PreferencesPage() {
+  const router = useRouter()
+  
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
-        <div className="text-xl font-semibold text-gray-800">菜根探</div>
-        <nav className="hidden md:flex items-center space-x-8">
-          <a href="#" className="text-gray-600 hover:text-gray-800">
-            个人偏好设置
-          </a>
-          <a href="#" className="text-gray-600 hover:text-gray-800">
-            就餐地点推荐
-          </a>
-          <div className="text-gray-800 font-medium">Username</div>
-        </nav>
+    <div className="flex flex-col min-h-screen">
+      <header className="flex h-16 items-center border-b px-4 w-full justify-end">
+        <Button 
+          variant="ghost" 
+          onClick={() => router.push('/chatbot')}
+        >
+          就餐地点推荐
+        </Button>
       </header>
-
-      {/* Main Content */}
-      <main className="px-6 py-8 max-w-6xl mx-auto">
-        {/* Page Title */}
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">个人偏好设置</h1>
-        
-        {/* Description */}
-        <p className="text-gray-600 mb-16 max-w-4xl">
-          请在下面输入您对餐厅与食物的所有偏好和需求，以下所有内容仅作为推荐算法基地点的参考依据。以下所有项均为选项，即使不填也一样可以使用我们的服务！
-        </p>
-
-        {/* Task 1: Price Range */}
-        <section className="mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您所期望的餐厅人均消费为多少？</h2>
+      <div className="flex-1 container mx-auto py-6">
+        {/* Main Content */}
+        <main className="px-6 py-8 max-w-6xl mx-auto">
+          {/* Page Title */}
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">个人偏好设置</h1>
           
-          <div className="max-w-2xl">
-            <PriceRangeSlider label="人均消费范围" />
-          </div>
-        </section>
+          {/* Description */}
+          <p className="text-gray-600 mb-16 max-w-4xl">
+            请在下面输入您对餐厅与食物的所有偏好和需求，以下所有内容仅作为推荐算法基地点的参考依据。以下所有项均为选项，即使不填也一样可以使用我们的服务！
+          </p>
 
-        {/* Task 2: Rating Preferences */}
-        <section className="mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您在选择就餐地点时对以下各项的重视或敏感程度？</h2>
-          
-          <div className="max-w-2xl space-y-5">
-            <RatingSlider label="性价比" />
+          {/* Task 1: Price Range */}
+          <section className="mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您所期望的餐厅人均消费为多少？</h2>
             
-            <RatingSlider 
-              label="卫生情况" 
-              description="如餐厨具卫生程度、食材新鲜程度、是否公示食品安全信息等" 
-            />
-            
-            <RatingSlider label="用餐环境" />
-            
-            <RatingSlider label="餐厅距离 & 交通便利程度" />
-            
-            <RatingSlider label="排队等位时间 & 上菜速度" />
-            
-            <RatingSlider 
-              label="在美食推荐平台上的综合评分高低" 
-              description="如大众点评等" 
-            />
-            
-            <RatingSlider label="餐厅服务" />
-            
-            <RatingSlider label="菜品口味" />
-            
-            <RatingSlider label="菜品健康程度" />
-            
-            <RatingSlider label="菜品热量 & 营养成分" />
-          </div>
-        </section>
+            <div className="max-w-2xl">
+              <PriceRangeSlider label="人均消费范围" />
+            </div>
+          </section>
 
-        {/* Task 3: Food Preferences */}
-        <section className="mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您对菜品类型、口味的偏好？</h2>
-          
-          <div className="max-w-2xl space-y-8">
-            <TextareaField 
-              label="有什么是您绝对不能吃的东西？" 
-              description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
-            />
+          {/* Task 2: Rating Preferences */}
+          <section className="mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您在选择就餐地点时对以下各项的重视或敏感程度？</h2>
             
-            <TextareaField 
-              label="您喜欢吃什么？" 
-              description="您可以写菜品或食物名称，如&quot;披萨&quot;等；您也可以写具体菜系类型，如&quot;川菜&quot;等；您也可以写口味偏好，如&quot;清淡的东西&quot;等。写什么都可以！"
-            />
-            
-            <TextareaField 
-              label="您讨厌吃什么？" 
-              description="您可以写菜品或食物名称，如&quot;香菜&quot;等；您也可以写具体菜系类型或者是口味偏好，如&quot;重油重盐的东西&quot;等。写什么都可以！"
-            />
-            
-            <RatingSlider label="您对辣味的接受程度？" />
-          </div>
-        </section>
-      </main>
+            <div className="max-w-2xl space-y-5">
+              <RatingSlider label="性价比" />
+              
+              <RatingSlider 
+                label="卫生情况" 
+                description="如餐厨具卫生程度、食材新鲜程度、是否公示食品安全信息等" 
+              />
+              
+              <RatingSlider label="用餐环境" />
+              
+              <RatingSlider label="餐厅距离 & 交通便利程度" />
+              
+              <RatingSlider label="排队等位时间 & 上菜速度" />
+              
+              <RatingSlider 
+                label="在美食推荐平台上的综合评分高低" 
+                description="如大众点评等" 
+              />
+              
+              <RatingSlider label="餐厅服务" />
+              
+              <RatingSlider label="菜品口味" />
+              
+              <RatingSlider label="菜品健康程度" />
+              
+              <RatingSlider label="菜品热量 & 营养成分" />
+            </div>
+          </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-50 py-12 px-6 mt-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">菜根探</h3>
-              <div className="flex space-x-4">
-                <Facebook className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-                <Linkedin className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-                <Youtube className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-                <Instagram className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+          {/* Task 3: Food Preferences */}
+          <section className="mb-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您对菜品类型、口味的偏好？</h2>
+            
+            <div className="max-w-2xl space-y-8">
+              <TextareaField 
+                label="有什么是您绝对不能吃的东西？" 
+                description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
+              />
+              
+              <TextareaField 
+                label="您喜欢吃什么？" 
+                description="您可以写菜品或食物名称，如&quot;披萨&quot;等；您也可以写具体菜系类型，如&quot;川菜&quot;等；您也可以写口味偏好，如&quot;清淡的东西&quot;等。写什么都可以！"
+              />
+              
+              <TextareaField 
+                label="您讨厌吃什么？" 
+                description="您可以写菜品或食物名称，如&quot;香菜&quot;等；您也可以写具体菜系类型或者是口味偏好，如&quot;重油重盐的东西&quot;等。写什么都可以！"
+              />
+              
+              <RatingSlider label="您对辣味的接受程度？" />
+            </div>
+          </section>
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-gray-50 py-12 px-6 mt-20">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">菜根探</h3>
+                <div className="flex space-x-4">
+                  <Facebook className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                  <Linkedin className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                  <Youtube className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                  <Instagram className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-4">了解菜根探</h4>
+                <div className="space-y-2 text-gray-600 text-sm">
+                  <div>我们为什么想做菜根探？</div>
+                  <div>您的个人数据将安全吗？</div>
+                  <div>我们为什么叫菜根探产品展示？</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-4">关于我们</h4>
+                <div className="space-y-2 text-gray-600 text-sm">
+                  <div>我们是谁？</div>
+                  <div>什么是菜根探？</div>
+                  <div>联系我们登录？</div>
+                </div>
               </div>
             </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">了解菜根探</h4>
-              <div className="space-y-2 text-gray-600 text-sm">
-                <div>我们为什么想做菜根探？</div>
-                <div>您的个人数据将安全吗？</div>
-                <div>我们为什么叫菜根探产品展示？</div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-4">关于我们</h4>
-              <div className="space-y-2 text-gray-600 text-sm">
-                <div>我们是谁？</div>
-                <div>什么是菜根探？</div>
-                <div>联系我们登录？</div>
-              </div>
-            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   )
 }
