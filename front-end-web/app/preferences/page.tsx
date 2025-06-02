@@ -1,16 +1,17 @@
 "use client"
 
-import React, { ComponentProps } from 'react'
+import React, { ComponentProps, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Facebook, Linkedin, Youtube, Instagram } from 'lucide-react'
-import { useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { useRouter } from 'next/navigation'
+import { PreferenceProvider, usePreferences, PreferenceData } from '@/context/PreferenceContext'
 
 // Custom Slider Component
 function PriceRangeSlider({ label }: { label: string }) {
-  const [minValue, setMinValue] = useState(0)
-  const [maxValue, setMaxValue] = useState(100)
+  const { preferences, updatePriceRange } = usePreferences();
+  const [minValue, setMinValue] = useState(preferences.priceRange.min);
+  const [maxValue, setMaxValue] = useState(preferences.priceRange.max);
 
   // Convert slider position (0-100) to price
   const positionToPrice = (position: number): number => {
@@ -48,14 +49,16 @@ function PriceRangeSlider({ label }: { label: string }) {
   }
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const position = parseInt(e.target.value)
-    setMinValue(position)
-  }
+    const position = parseInt(e.target.value);
+    setMinValue(position);
+    updatePriceRange(position, maxValue);
+  };
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const position = parseInt(e.target.value)
-    setMaxValue(position)
-  }
+    const position = parseInt(e.target.value);
+    setMaxValue(position);
+    updatePriceRange(minValue, position);
+  };
 
   const minPrice = positionToPrice(minValue)
   const maxPrice = positionToPrice(maxValue)
@@ -128,8 +131,13 @@ function PriceRangeSlider({ label }: { label: string }) {
 }
 
 // Rating Slider Component (0-5 scale with snap points)
-function RatingSlider({ label, description }: { label: string; description?: string }) {
-  const [value, setValue] = useState(2.5) // Default to middle position
+function RatingSlider({ label, description, ratingKey }: { 
+  label: string; 
+  description?: string;
+  ratingKey: keyof PreferenceData['ratings'];
+}) {
+  const { preferences, updateRating } = usePreferences();
+  const [value, setValue] = useState(preferences.ratings[ratingKey]);
 
   const snapPoints = [0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]
 
@@ -140,6 +148,7 @@ function RatingSlider({ label, description }: { label: string; description?: str
       Math.abs(curr - rawValue) < Math.abs(prev - rawValue) ? curr : prev
     )
     setValue(nearest)
+    updateRating(ratingKey, nearest);
   }
 
   return (
@@ -211,12 +220,22 @@ function RatingSlider({ label, description }: { label: string; description?: str
 }
 
 // Custom Textarea Field Component
-function TextareaField({ label, description, defaultValue = "无" }: { 
+function TextareaField({ 
+  label, 
+  description, 
+  preferenceKey 
+}: { 
   label: string; 
   description?: string;
-  defaultValue?: string;
+  preferenceKey: keyof PreferenceData['preferences'];
 }) {
-  const [value, setValue] = useState(defaultValue)
+  const { preferences, updatePreference } = usePreferences();
+  const [value, setValue] = useState(preferences.preferences[preferenceKey]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+    updatePreference(preferenceKey, e.target.value);
+  };
 
   return (
     <div className="space-y-2">
@@ -228,7 +247,7 @@ function TextareaField({ label, description, defaultValue = "无" }: {
       </div>
       <Textarea 
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={handleChange}
         className="min-h-[100px] border-gray-300 focus:border-black focus:ring-black"
       />
     </div>
@@ -239,128 +258,153 @@ export default function PreferencesPage() {
   const router = useRouter()
   
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 items-center border-b px-4 w-full justify-end">
-        <Button 
-          variant="ghost" 
-          onClick={() => router.push('/chatbot')}
-        >
-          就餐地点推荐
-        </Button>
-      </header>
-      <div className="flex-1 container mx-auto py-6">
-        {/* Main Content */}
-        <main className="px-6 py-8 max-w-6xl mx-auto">
-          {/* Page Title */}
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">个人偏好设置</h1>
-          
-          {/* Description */}
-          <p className="text-gray-600 mb-16 max-w-4xl">
-            请在下面输入您对餐厅与食物的所有偏好和需求，以下所有内容仅作为推荐算法基地点的参考依据。以下所有项均为选项，即使不填也一样可以使用我们的服务！
-          </p>
-
-          {/* Task 1: Price Range */}
-          <section className="mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您所期望的餐厅人均消费为多少？</h2>
+    <PreferenceProvider>
+      <div className="flex flex-col min-h-screen">
+        <header className="flex h-16 items-center border-b px-4 w-full justify-end">
+          <Button 
+            variant="ghost" 
+            onClick={() => router.push('/chatbot')}
+          >
+            就餐地点推荐
+          </Button>
+        </header>
+        <div className="flex-1 container mx-auto py-6">
+          {/* Main Content */}
+          <main className="px-6 py-8 max-w-6xl mx-auto">
+            {/* Page Title */}
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">个人偏好设置</h1>
             
-            <div className="w-full max-w-2xl mx-auto">
-              <PriceRangeSlider label="人均消费范围" />
-            </div>
-          </section>
+            {/* Description */}
+            <p className="text-gray-600 mb-16 max-w-4xl">
+              请在下面输入您对餐厅与食物的所有偏好和需求，以下所有内容仅作为推荐算法基地点的参考依据。以下所有项均为选项，即使不填也一样可以使用我们的服务！
+            </p>
 
-          {/* Task 2: Rating Preferences */}
-          <section className="mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您在选择就餐地点时对以下各项的重视或敏感程度？</h2>
-            
-            <div className="w-full max-w-2xl mx-auto">
-              <RatingSlider label="性价比" />
+            {/* Task 1: Price Range */}
+            <section className="mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您所期望的餐厅人均消费为多少？</h2>
               
-              <RatingSlider 
-                label="卫生情况" 
-                description="如餐厨具卫生程度、食材新鲜程度、是否公示食品安全信息等" 
-              />
-              
-              <RatingSlider label="用餐环境" />
-              
-              <RatingSlider label="餐厅距离 & 交通便利程度" />
-              
-              <RatingSlider label="排队等位时间 & 上菜速度" />
-              
-              <RatingSlider 
-                label="在美食推荐平台上的综合评分高低" 
-                description="如大众点评等" 
-              />
-              
-              <RatingSlider label="餐厅服务" />
-              
-              <RatingSlider label="菜品口味" />
-              
-              <RatingSlider label="菜品健康程度" />
-              
-              <RatingSlider label="菜品热量 & 营养成分" />
-            </div>
-          </section>
+              <div className="w-full max-w-2xl mx-auto">
+                <PriceRangeSlider label="人均消费范围" />
+              </div>
+            </section>
 
-          {/* Task 3: Food Preferences */}
-          <section className="mb-16">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您对菜品类型、口味的偏好？</h2>
-            
-            <div className="w-full max-w-2xl mx-auto">
-              <TextareaField 
-                label="有什么是您绝对不能吃的东西？" 
-                description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
-              />
+            {/* Task 2: Rating Preferences */}
+            <section className="mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您在选择就餐地点时对以下各项的重视或敏感程度？</h2>
               
-              <TextareaField 
-                label="您喜欢吃什么？" 
-                description="您可以写菜品或食物名称，如&quot;披萨&quot;等；您也可以写具体菜系类型，如&quot;川菜&quot;等；您也可以写口味偏好，如&quot;清淡的东西&quot;等。写什么都可以！"
-              />
-              
-              <TextareaField 
-                label="您讨厌吃什么？" 
-                description="您可以写菜品或食物名称，如&quot;香菜&quot;等；您也可以写具体菜系类型或者是口味偏好，如&quot;重油重盐的东西&quot;等。写什么都可以！"
-              />
-              
-              <RatingSlider label="您对辣味的接受程度？" />
-            </div>
-          </section>
-        </main>
+              <div className="w-full max-w-2xl mx-auto">
+                <RatingSlider label="性价比" ratingKey="valueForMoney" />
+                
+                <RatingSlider 
+                  label="卫生情况" 
+                  description="如餐厨具卫生程度、食材新鲜程度、是否公示食品安全信息等" 
+                  ratingKey="hygiene"
+                />
+                
+                <RatingSlider label="用餐环境" ratingKey="environment" />
+                
+                <RatingSlider label="餐厅距离 & 交通便利程度" ratingKey="distance" />
+                
+                <RatingSlider label="排队等位时间 & 上菜速度" ratingKey="waitTime" />
+                
+                <RatingSlider 
+                  label="在美食推荐平台上的综合评分高低" 
+                  description="如大众点评等" 
+                  ratingKey="platformRating"
+                />
+                
+                <RatingSlider label="餐厅服务" ratingKey="service" />
+                
+                <RatingSlider label="菜品口味" ratingKey="taste" />
+                
+                <RatingSlider label="菜品健康程度" ratingKey="health" />
+                
+                <RatingSlider label="菜品热量 & 营养成分" ratingKey="nutrition" />
+              </div>
+            </section>
 
-        {/* Footer */}
-        <footer className="bg-gray-50 py-12 px-6 mt-20">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="text-lg font-semibold mb-4">菜根探</h3>
-                <div className="flex space-x-4">
-                  <Facebook className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-                  <Linkedin className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-                  <Youtube className="w-5 h-5 text-gray-600 hover:text-gray-800" />
-                  <Instagram className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+            {/* Task 3: Food Preferences */}
+            <section className="mb-16">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">您对菜品类型、口味的偏好？</h2>
+              
+              <div className="w-full max-w-2xl mx-auto">
+                <TextareaField 
+                  label="有什么是您绝对不能吃的东西？" 
+                  description="您可以写具体的食材，如过敏原等；您也可以在这里写您需要忌口的原因，如&quot;糖尿病&quot;等"
+                  preferenceKey="allergies"
+                />
+                
+                <TextareaField 
+                  label="您喜欢吃什么？" 
+                  description="您可以写菜品或食物名称，如&quot;披萨&quot;等；您也可以写具体菜系类型，如&quot;川菜&quot;等；您也可以写口味偏好，如&quot;清淡的东西&quot;等。写什么都可以！"
+                  preferenceKey="likes"
+                />
+                
+                <TextareaField 
+                  label="您讨厌吃什么？" 
+                  description="您可以写菜品或食物名称，如&quot;香菜&quot;等；您也可以写具体菜系类型或者是口味偏好，如&quot;重油重盐的东西&quot;等。写什么都可以！"
+                  preferenceKey="dislikes"
+                />
+                
+                <RatingSlider label="您对辣味的接受程度？" ratingKey="spiciness" />
+              </div>
+            </section>
+
+            {/* 双按钮组件 */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-12 mb-20">
+              <Button 
+                variant="outline"
+                className="border border-black text-black hover:bg-gray-100 px-8 py-3"
+                // onClick={savePreferences}
+              >
+                暂存更改
+              </Button>
+              <Button 
+                variant="outline"
+                className="bg-black text-white hover:bg-gray-800 px-8 py-3"
+              >
+                保存信息
+              </Button>
+            </div>
+
+          </main>
+
+          {/* Footer */}
+          <footer className="bg-gray-50 py-12 px-6 mt-20">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-8">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">菜根探</h3>
+                  <div className="flex space-x-4">
+                    <Facebook className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                    <Linkedin className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                    <Youtube className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                    <Instagram className="w-5 h-5 text-gray-600 hover:text-gray-800" />
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-4">了解菜根探</h4>
+                  <div className="space-y-2 text-gray-600 text-sm">
+                    <div>我们为什么想做菜根探？</div>
+                    <div>您的个人数据将安全吗？</div>
+                    <div>我们为什么叫菜根探产品展示？</div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-4">关于我们</h4>
+                  <div className="space-y-2 text-gray-600 text-sm">
+                    <div>我们是谁？</div>
+                    <div>什么是菜根探？</div>
+                    <div>联系我们登录？</div>
+                  </div>
                 </div>
               </div>
-
-              <div>
-                <h4 className="font-semibold mb-4">了解菜根探</h4>
-                <div className="space-y-2 text-gray-600 text-sm">
-                  <div>我们为什么想做菜根探？</div>
-                  <div>您的个人数据将安全吗？</div>
-                  <div>我们为什么叫菜根探产品展示？</div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-4">关于我们</h4>
-                <div className="space-y-2 text-gray-600 text-sm">
-                  <div>我们是谁？</div>
-                  <div>什么是菜根探？</div>
-                  <div>联系我们登录？</div>
-                </div>
-              </div>
             </div>
-          </div>
-        </footer>
+          </footer>
+        </div>
       </div>
-    </div>
+    </PreferenceProvider>
   )
 }
