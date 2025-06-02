@@ -72,7 +72,20 @@ const PreferenceContext = createContext<PreferenceContextType | undefined>(undef
 // 在前端调用的这个函数（React组件）时候要用<PreferenceProvider> 传入的参数 </PreferenceProvider>格式，或<PreferenceProvider/>调用。
 // React组件在定义时，括号里的东西叫props，props里可以包含一些参数，这些参数可以在组件的render函数中使用。
 export function PreferenceProvider({ children }: { children: ReactNode }) {
-  const [preferences, setPreferences] = useState<PreferenceData>(initialPreferences);
+  // 在组件初始化时尝试从 localStorage 加载保存的设置
+  const loadSavedPreferences = () => {
+    try {
+      const savedData = localStorage.getItem('userPreferences');
+      if (savedData) {
+        return JSON.parse(savedData) as PreferenceData;
+      }
+    } catch (error) {
+      console.error('加载保存的偏好设置时出错：', error);
+    }
+    return initialPreferences;
+  };
+
+  const [preferences, setPreferences] = useState<PreferenceData>(loadSavedPreferences());
 
   const updatePriceRange = (min: number, max: number) => {
     setPreferences(prev => ({
