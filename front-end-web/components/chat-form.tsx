@@ -37,7 +37,7 @@ export const ChatForm = () => {
   // 渲染组件
   return (
     // 主容器
-    <div className="flex flex-col h-full bg-green-100">
+    <div className="flex flex-col h-full bg-white ">
       {/* 欢迎信息区域 */}
       <div className="text-center py-8 relative flex items-center justify-center gap-8 rounded-2xl">
         {/* 上面装饰图片 */}
@@ -52,13 +52,21 @@ export const ChatForm = () => {
         <p className="text-gray-700 text-sm max-w-md">
           欢迎来到菜根探！我是您的南大美食助手，专门推荐鼓楼校区周边的美食。您可以告诉我您的预算、口味偏好，我会为您推荐合适的餐厅和美食。
         </p>
+                {/* 装饰图片容器 - 移动到消息区域内部的底部 */}
+          <Image
+            src="/upfood2-icon.png"
+            alt="装饰图"
+            width={300}
+            height={100}
+            className="object-cover rounded-2xl"
+          />
 
 
       </div>
 
       {/* 消息显示区域 */}
       <div className="flex-1 overflow-y-auto pb-20 ">
-        <div className="flex flex-col gap-4 p-6 max-w-3x1 mx-auto w-full bg-amber-400 rounded-2xl  min-h-[120px]">
+        <div className="flex flex-col gap-4 p-6 max-w-3x1 mx-auto w-full  rounded-2xl  min-h-[120px]">
           {/* 遍历并渲染所有消息 */}
           {messages.map((message, index) => (
             <div 
@@ -71,8 +79,8 @@ export const ChatForm = () => {
                 className={cn(
                   "max-w-[70%] rounded-2xl px-4 py-3 text-sm",
                   message.role === "user" 
-                    ? "bg-green-600 text-white"     // 用户消息样式：绿色背景
-                    : "bg-gray-100 text-gray-900"   // AI消息样式：灰色背景
+                    ? "bg-yellow-300 text-black"     // 用户消息样式：绿色背景
+                    : "bg-orange-400 text-black"   // AI消息样式：灰色背景
                 )}
               >
                 {message.content}
@@ -80,16 +88,7 @@ export const ChatForm = () => {
             </div>
           ))}
         </div>
-                {/* 装饰图片容器 - 移动到消息区域内部的底部 */}
-        <div className="flex justify-center items-center mt-2"> {/* 改用 mt-2 添加少量上边距 */}
-          <Image
-            src="/upfood2-icon.png"
-            alt="装饰图"
-            width={300}
-            height={100}
-            className="object-cover rounded-2xl"
-          />
-        </div>
+
       </div>
       
 
@@ -102,13 +101,13 @@ export const ChatForm = () => {
             value={input}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 resize-none rounded-2xl border px-4 py-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-600 min-h-12 max-h-48"
+            className="flex-1 resize-none rounded-2xl border px-4 py-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-600 min-h-12 max-h-48"
           />
           {/* 发送按钮 */}
           <Button
             type="submit"
             variant="ghost"
-            className="shrink-0 h-10 w-10 rounded-full bg-green-600 hover:bg-green-700"
+            className="shrink-0 h-10 w-10 rounded-full bg-yellow-300 hover:bg-yellow-500"
           >
             <ArrowUpIcon className="h-10 w-10 text-black" />
           </Button>

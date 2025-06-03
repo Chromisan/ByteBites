@@ -16,7 +16,7 @@ export function UserNav() {
 
 
   return (
-    <nav className="fixed top-0 z-50 w-full flex items-center justify-between p-4 border-b-2 bg-white">
+    <nav className="fixed top-0 z-50 w-full flex items-center justify-between p-4 border-b-2 bg-amber-300">
       {/* 左侧空白区域 */}
       <div className="flex-1" />
       
@@ -27,10 +27,10 @@ export function UserNav() {
       <div className="flex-1 flex justify-end">
           <Button
             variant="default"
-            className="relative h-8 w-8 rounded-full bg-green-600 hover:bg-green-700"
+            className="relative h-8 w-8 rounded-full bg-orange-500 hover:bg-orange-600"
             onClick={() => router.push('/preferences')}
           >
-          <Avatar className="h-8 w-8">
+          <Avatar className="h-7 w-7">
             <AvatarImage 
               src="/default_avatar.png" // 默认头像图片路径
               alt="User photo"// 图片替代文本
