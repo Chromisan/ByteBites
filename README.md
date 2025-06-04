@@ -13,7 +13,7 @@ npm -v   # 应显示版本号（如9.5.1）
 pnpm是npm的替代品，可以加速Node.js项目的依赖安装。
 输入以下命令行命令：
 ```bash
-cd front-end-web
+cd frontend-web
 npm install -g pnpm@latest-10
 ```
 
