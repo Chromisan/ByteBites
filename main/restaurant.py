@@ -19,7 +19,7 @@ import getpass
 import time
 
 # ========== 数据加载与处理 ==========
-DATASET_PATH = r"D:\000ai产品\ByteBites\Restaurant_5.23\restaurant_all.csv"
+DATASET_PATH = r"restaurant_all.csv"
 
 def get_documents(content_func=lambda row: row['name'] + '\n' + row['tag'],
                   metadata_fields=[]):
