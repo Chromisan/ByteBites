@@ -1,3 +1,6 @@
+import os
+os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
 import pandas as pd
 from langchain.prompts import (
     PromptTemplate,
@@ -5,22 +8,22 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
     ChatPromptTemplate,
 )
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.document_loaders import DataFrameLoader
+from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.vectorstores import FAISS
 from langchain.schema.runnable import RunnablePassthrough, RunnableMap, RunnableLambda
 from langchain.memory import ConversationBufferMemory
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain.document_loaders import DataFrameLoader
 import numpy as np
 import os
 from dotenv import load_dotenv
-from langchain.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage
 import getpass
 import time
 
 # ========== 数据加载与处理 ==========
-DATASET_PATH = r"restaurant_all.csv"
+DATASET_PATH = os.path.join(os.path.dirname(__file__), "restaurant_all.csv")
 
 def get_documents(content_func=lambda row: row['name'] + '\n' + row['tag'],
                   metadata_fields=[]):
