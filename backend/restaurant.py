@@ -10,6 +10,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.schema.runnable import RunnablePassthrough, RunnableMap, RunnableLambda
 from langchain.memory import ConversationBufferMemory
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from langchain.document_loaders import DataFrameLoader
 import numpy as np
 import os
 from dotenv import load_dotenv
@@ -367,7 +368,8 @@ def collect_user_profile():
 # ========== 主流程 ==========
 def main():
     print("欢迎使用智能美食推荐系统！")
-    user_profile = collect_user_profile()
+    global user_preference
+    user_preference = collect_user_profile()
     from langchain.memory import ConversationBufferMemory
     memory = ConversationBufferMemory(memory_key="history", return_messages=True)
     print("\n请输入你的本次用餐需求（如‘预算50元内，想吃辣的，适合2人，距离不远’）：")
@@ -378,7 +380,7 @@ def main():
             break
         input_data = {
             "question": question,
-            "user_preference": format_user_preference(user_profile)
+            "user_preference": format_user_preference(user_preference)
         }
         response = review_chain.invoke(input_data)
         memory.save_context({"input": question}, {"output": response})
