@@ -256,7 +256,7 @@ function TextareaField({
 
 export default function PreferencesPage() {
   const router = useRouter();
-  const { savePreferences } = usePreferences();
+  const { preferences, savePreferences } = usePreferences();
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -362,6 +362,28 @@ export default function PreferencesPage() {
             <Button 
               variant="outline"
               className="bg-black text-white hover:bg-gray-800 px-8 py-3"
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/preferences', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(preferences)
+                  });
+
+                  if (!response.ok) {
+                    throw new Error('保存失败');
+                  }
+
+                  alert('保存成功！');
+                  router.push('/chatbot');
+
+                } catch (error) {
+                  alert('保存失败，请稍后重试');
+                  console.error('Error saving preferences:', error);
+                }
+              }}
             >
               保存信息
             </Button>
