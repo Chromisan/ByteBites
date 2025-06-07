@@ -24,13 +24,25 @@ npm install -g pnpm@latest-10
 pnpm install
 ```
 
-## 启动前端
-### 启动后端服务器
-切换到后端目录，输入以下命令行命令启动uvicorn服务器：
-```bash
-cd backend
-uvicorn main:app --reload
+## 第一次运行的初始化步骤
+**注：不需要运行此步骤，因为初始化后的数据已经上传到git了。**
+### 初始化向量数据库
+~~首次运行系统之前，需要先初始化向量数据库。切换到项目根目录，输入以下命令：~~
+```powershell
+cd ByteBites
+$env:PYTHONPATH = "."  # 设置Python路径
+python backend/init_vectordb.py  # 初始化向量数据库（首次运行需要，可能需要几分钟）
 ```
+
+## 启动系统
+### 启动后端服务器
+切换到项目根目录，输入以下命令行命令启动后端服务器：
+```powershell
+cd ByteBites
+$env:PYTHONPATH = "."  # 设置Python路径
+python backend/main.py  # 启动后端服务器
+```
+服务器将在 http://localhost:8000 上运行。
 
 ### 启动前端服务器
 切换到前端目录，在另一个终端窗口启动前端开发服务器：
@@ -49,9 +61,32 @@ Stop-Process -Name "python" -Force  # 停止后端服务器
 ```
 或者在各自的终端窗口中按 Ctrl+C 来优雅地停止服务器。
 
+## 启动顺序说明
+1. 首先启动后端服务器
+2. 然后启动前端服务器
+3. 最后在浏览器中访问前端页面
 
+请注意：
+- 后端服务器必须在前端服务器之前启动
+- 确保后端服务器运行在 http://localhost:8000
+- 确保前端服务器运行在 http://localhost:3000
+- 两个服务器都需要保持运行状态
 
+## 常见问题排查
+1. 如果出现"无法加载聊天历史"错误：
+   - 检查后端服务器是否正常运行
+   - 检查终端中是否有错误信息
+   - 确认环境变量 PYTHONPATH 已正确设置
 
+2. 如果前端无法连接到后端：
+   - 确保后端服务器正在运行
+   - 检查浏览器控制台是否有错误信息
+   - 验证是否能访问 http://localhost:8000/chat/health
+
+3. 如果遇到 Python 导入错误：
+   - 确保在正确的目录下运行命令
+   - 确保已设置 PYTHONPATH
+   - 确保已安装所有必要的 Python 依赖（requirements.txt）
 
 > 注：若报错Module not found: Can't resolve '@/lib/utils'
 表示项目的根目录下缺少了 lib/utils.ts 文件。
