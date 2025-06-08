@@ -53,6 +53,13 @@ pnpm dev
 这个命令会启动一个本地开发服务器，通常在 http://localhost:3000 上运行。
 打开浏览器，访问：http://localhost:3000 即可看到网页。
 
+### 启动正式版
+构建生产版本
+pnpm build
+
+启动生产服务器
+pnpm start
+
 ## 停止服务
 如果想取消进程，在命令行中输入：
 ```bash

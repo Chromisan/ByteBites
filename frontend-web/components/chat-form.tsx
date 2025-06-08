@@ -187,35 +187,33 @@ export const ChatForm = () => {
       e.preventDefault()
       handleSubmit(e as unknown as React.FormEvent<HTMLFormElement>)
     }
-  }
-
-  // 渲染组件
+  }  // 渲染组件
   return (
-    // 主容器
-    <div className="flex flex-col h-full bg-white">
-      {/* 欢迎信息区域 */}
-      <div className="text-center py-8 relative flex items-center justify-center gap-8 rounded-2xl">
-        {/* 上面装饰图片 */}
-        <Image
-          src="/upfood-icon.png"  
-          alt="装饰图"
-          width={400}
-          height={150}
-          className="object-cover rounded-2xl"
-        />
-        
-        <p className="text-gray-700 text-sm max-w-md">
-          欢迎来到菜根探！我是您的南大美食助手，专门推荐鼓楼校区周边的美食。您可以告诉我您的预算、口味偏好，我会为您推荐合适的餐厅和美食。
-        </p>
-                {/* 装饰图片容器 - 移动到消息区域内部的底部 */}
-          <Image
-            src="/upfood2-icon.png"
-            alt="装饰图"
-            width={300}
-            height={100}
-            className="object-cover rounded-2xl"
-          />
-
+    // 主容器 - 科技风格增强
+    <div className="flex flex-col h-full bg-amber-100/20 overflow-hidden">{/* 欢迎信息区域 - 科技风格重新设计 */}
+      <div className="flex flex-col items-center py-12 px-6 bg-gradient-to-b from-amber-100/50 via-amber-50/30 to-white relative backdrop-blur-sm">        <h1 className="text-4xl font-bold text-amber-800 mb-4 tracking-wide drop-shadow-sm">欢迎来到菜根探</h1>
+        <p className="text-lg text-amber-900/70 max-w-2xl text-center mb-8 leading-relaxed">
+          我是您的南大美食助手，专门推荐鼓楼校区周边的美食。
+          告诉我您的预算和口味偏好，让我为您找到最适合的餐厅。
+        </p><div className="flex justify-center gap-16 w-full mb-4">
+            <Image
+              src="/upfood-icon.png"  
+              alt="美食图标"
+              width={220}
+              height={100} 
+              className="rounded-2xl shadow-lg hover:scale-105 transition-transform"
+              style={{ objectFit: "contain" }}
+            />
+          
+            <Image
+              src="/upfood2-icon.png"
+              alt="美食图标"
+              width={220}
+              height={100}
+              className="rounded-2xl shadow-lg hover:scale-105 transition-transform"
+              style={{ objectFit: "contain" }}
+            />
+          </div>
 
         {/* 改进的清除历史按钮样式和位置 */}
         <Button
@@ -234,9 +232,8 @@ export const ChatForm = () => {
            initialMessages.length === 0 ? "无历史记录" : 
            "清除历史"}
         </Button>
-      </div>
-
-      {/* 消息显示区域 */}      <div className="flex-1 overflow-y-auto pb-20">
+      </div>      {/* 消息显示区域 - 科技风格增强 */}
+      <div className="flex-1 overflow-y-auto pb-20 bg-gradient-to-b from-white via-amber-50/40 to-amber-100/40">
         <div className="flex flex-col gap-4 p-6 max-w-3xl mx-auto w-full rounded-2xl min-h-[120px]">
           
           {/* 遍历并渲染所有消息 */}
@@ -246,13 +243,12 @@ export const ChatForm = () => {
               className={cn("flex", 
                 message.role === "user" ? "justify-end" : "justify-start"  // 用户消息靠右，AI消息靠左
               )}
-            >
-              <div
+            >              <div
                 className={cn(
-                  "max-w-[70%] rounded-2xl px-4 py-3 text-sm",
+                  "max-w-[70%] rounded-2xl px-5 py-4 shadow-md text-base",
                   message.role === "user" 
-                    ? "bg-yellow-300 text-black"     // 用户消息样式：绿色背景
-                    : "bg-orange-400 text-black"   // AI消息样式：灰色背景
+                    ? "bg-amber-200/90 text-amber-950 border border-amber-300/70 backdrop-blur-sm"  // 用户消息样式
+                    : "bg-white/90 text-amber-900 border border-amber-200/70 backdrop-blur-sm"  // AI消息样式
                 )}
               >
                 {message.content}
@@ -260,35 +256,34 @@ export const ChatForm = () => {
             </div>
           ))}
         </div>
-
-      </div>
-          {/* 输入区域 */}
-      <form onSubmit={handleSubmit} className="sticky bottom-0 w-full p-4 bg-white border-t">
-        <div className="flex gap-2 min-h-[100px]">
+      </div>      {/* 输入区域 - 科技风格增强 */}
+      <form onSubmit={handleSubmit} className="sticky bottom-0 w-full p-4 bg-gradient-to-t from-amber-100/40 to-amber-50/30 border-t border-amber-200/50 shadow-lg backdrop-blur-sm">
+        <div className="flex gap-3 max-w-3xl mx-auto">
           {/* 自适应文本输入框 */}
           <AutoResizeTextarea
-            placeholder={isLoading ? "正在思考中..." : "您想吃点啥..."}
+            placeholder={isLoading ? "正在思考中..." : "请告诉我您的用餐需求..."}
             value={input}
             disabled={isLoading}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="flex-1 resize-none rounded-2xl border px-4 py-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-600 min-h-12 max-h-48"
-          />          {/* 发送按钮 */}
+            className="flex-1 resize-none rounded-xl border border-amber-400/50 px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 min-h-14 max-h-48 shadow-inner bg-white/80 text-amber-900"
+          />
+          {/* 发送按钮 */}
           <Button
             type="submit"
             variant="ghost"
             disabled={isLoading || !input.trim()}
             className={cn(
-              "shrink-0 h-10 w-10 rounded-full",
+              "shrink-0 h-14 w-14 rounded-full shadow-md flex items-center justify-center",
               isLoading 
                 ? "bg-gray-200 cursor-not-allowed"
-                : "bg-yellow-300 hover:bg-yellow-500"
+                : "bg-amber-700 hover:bg-amber-800 transition-colors"
             )}
           >
             {isLoading ? (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-400 border-t-transparent" />
+              <div className="h-6 w-6 animate-spin rounded-full border-3 border-white border-t-transparent" />
             ) : (
-              <ArrowUpIcon className="h-10 w-10 text-black" />
+              <ArrowUpIcon className="h-6 w-6 text-white" />
             )}
           </Button>
         </div>
