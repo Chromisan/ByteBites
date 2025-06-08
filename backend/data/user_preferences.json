@@ -1,23 +1,23 @@
 {
   "priceRange": {
     "min": 0.0,
-    "max": 72.0
+    "max": 54.0
   },
   "ratings": {
-    "valueForMoney": 2.5,
-    "hygiene": 2.5,
-    "environment": 2.5,
-    "distance": 1.5,
+    "valueForMoney": 5.0,
+    "hygiene": 3.5,
+    "environment": 4.0,
+    "distance": 2.5,
     "waitTime": 2.5,
-    "platformRating": 3.5,
-    "service": 2.5,
-    "taste": 3.0,
+    "platformRating": 2.5,
+    "service": 1.5,
+    "taste": 2.5,
     "health": 2.5,
     "nutrition": 2.5,
-    "spiciness": 4.0
+    "spiciness": 2.5
   },
   "preferences": {
-    "allergies": "我有糖尿病，不可以吃含糖过多的食物。",
+    "allergies": "123",
     "likes": "无",
     "dislikes": "无"
   }

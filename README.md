@@ -37,8 +37,8 @@ python backend/init_vectordb.py  # 初始化向量数据库（首次运行需要
 ## 启动系统
 ### 启动后端服务器
 切换到项目根目录，输入以下命令行命令启动后端服务器：
-```powershell
-cd ByteBites
+```bash
+cd backend
 $env:PYTHONPATH = "."  # 设置Python路径
 python backend/main.py  # 启动后端服务器
 ```

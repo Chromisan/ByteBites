@@ -5,6 +5,10 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dotenv import load_dotenv
 import getpass
+import time # Added for timing
+import traceback # Added for detailed traceback
+import openai # Added for openai.APITimeoutError
+import torch # Added for torch.cuda.is_available()
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import ChatOpenAI
@@ -57,19 +61,33 @@ class Chatbot:
         """初始化LLM和向量数据库"""
         # 加载环境变量
         load_dotenv()
-        if not os.environ.get("DEEPSEEK_API_KEY"):
+        api_key = os.environ.get("DEEPSEEK_API_KEY")
+        base_url = os.environ.get("DEEPSEEK_BASE_URL")
+        model_name = os.environ.get("DEEPSEEK_MODEL_V3") # 使用 DEEPSEEK_MODEL_V3
+
+        if not api_key:
             raise ValueError("未设置DEEPSEEK_API_KEY环境变量")
-        
-        # 初始化LLM
+        if not base_url:
+            # raise ValueError("未设置DEEPSEEK_BASE_URL环境变量") # 或者提供一个默认值
+            print("警告: 未设置DEEPSEEK_BASE_URL环境变量，将使用默认值 'https://api.deepseek.com'")
+            base_url = "https://api.deepseek.com"
+        if not model_name:
+            # raise ValueError("未设置DEEPSEEK_MODEL_V3环境变量") # 或者提供一个默认值
+            print(f"警告: 未设置DEEPSEEK_MODEL_V3环境变量，将使用默认值 'deepseek-chat'")
+            model_name = "deepseek-chat"
+          # 初始化LLM
         try:
+            # 使用流式模式，可能会更快地开始返回响应，减少超时风险
             llm = ChatOpenAI(
-                openai_api_key=os.environ["DEEPSEEK_API_KEY"],
-                openai_api_base="https://api.deepseek.com/v1",
-                model_name="deepseek-reasoner",
+                openai_api_key=api_key,
+                openai_api_base=base_url, # 使用从 .env 读取的 base_url
+                model_name=model_name,    # 使用从 .env 读取的 model_name
                 temperature=0.7,
-                request_timeout=30,
-                max_retries=3
+                request_timeout=120,      # 保持较长超时，但流式模式通常能更快返回
+                max_retries=3,
+                streaming=True            # 启用流式处理
             )
+            print(f"成功初始化LLM: model={model_name}, base_url={base_url}, streaming=True")
         except Exception as e:
             print(f"初始化LLM时出错: {str(e)}")
             raise
@@ -110,28 +128,54 @@ class Chatbot:
         
     def chat(self, message: str) -> str:
         """处理用户消息并返回回复"""
+        print(f"\\n===== Chatbot.chat: Received message at {datetime.now()} =====\\nUser message: {message}")
+        
+        start_time = time.time() # Start timing before any processing
+
         try:
-            # 获取用户偏好
-            user_pref = self._load_user_preference()
-            
-            # 准备输入数据
+            # 用户偏好现在在链中加载，这里准备链的输入
             input_data = {
                 "question": message,
-                "user_preference": format_user_preference(user_pref)
             }
+            print(f"\\n===== Chatbot.chat: Input data for chain =====\\n{json.dumps(input_data, indent=2, ensure_ascii=False)}")
             
-            # 获取响应
+            print(f"\\n===== Chatbot.chat: Invoking chain at {datetime.now()} =====")
+            chain_start_time = time.time()
             response = self.chain.invoke(input_data)
-            self.memory.save_context({"input": message}, {"output": response})
+            chain_end_time = time.time()
+            print(f"\\n===== Chatbot.chat: Chain invoked successfully in {chain_end_time - chain_start_time:.2f} seconds at {datetime.now()} =====")
+            
+            # 键名必须与初始化 ConversationBufferMemory 时的 input_key 和 output_key 一致
+            self.memory.save_context({"question": message}, {"answer": response})
             
             # 保存对话历史
             self._append_history(message, response)
             
+            response_snippet = response[:500] + '...' if len(response) > 500 else response
+            print(f"\\n===== Chatbot.chat: Sending response snippet to frontend =====\\n{response_snippet}")
             return response
             
+        except openai.APITimeoutError as e:
+            current_time = time.time()
+            duration = current_time - start_time
+            print(f"\\n!!!!! Chatbot.chat: OpenAI APITimeoutError after {duration:.2f} seconds at {datetime.now()} !!!!!")
+            print(f"Error type: {type(e)}")
+            print(f"Error message: {str(e)}")
+            if hasattr(e, 'request'):
+                print(f"Request details (if available): {e.request}")
+            print("Traceback:")
+            traceback.print_exc()
+            return f"处理超时，请稍后再试或尝试简化您的问题。错误详情: OpenAI API Timeout"
+            
         except Exception as e:
-            print(f"处理消息时出错: {str(e)}")
-            raise
+            current_time = time.time()
+            duration = current_time - start_time
+            print(f"\\n!!!!! Chatbot.chat: Generic error after {duration:.2f} seconds at {datetime.now()} !!!!!")
+            print(f"Error type: {type(e)}")
+            print(f"Error message: {str(e)}")
+            print("Traceback:")
+            traceback.print_exc()
+            return f"处理您的请求时发生错误。错误详情: {str(e)}"
 
     def _load_user_preference(self) -> Dict:
         """加载用户偏好设置"""
@@ -189,7 +233,27 @@ class Chatbot:
 
     def _setup_chain(self):
         """设置对话链和记忆"""
-        reviews_retriever = RunnableLambda(lambda x: x["question"]) | self.vector_db.as_retriever(search_kwargs={'k': 20,})
+
+        def log_retrieved_context(docs: List[Any]) -> List[Any]: # Assuming docs are Langchain Document objects
+            print("\\n===== Retrieved Context for LLM =====")
+            try:
+                context_str = "\\n".join([doc.page_content for doc in docs])
+                print(f"Number of documents retrieved: {len(docs)}")
+                print(f"Total context length: {len(context_str)} characters")
+                # Print a snippet of the context
+                snippet = context_str[:1000] + "..." if len(context_str) > 1000 else context_str
+                print(f"Context snippet:\\n{snippet}")
+            except Exception as e:
+                print(f"Error logging retrieved context: {e}")
+                print(f"Raw docs: {docs}")
+            print("===== End Retrieved Context =====\\n")
+            return docs
+
+        reviews_retriever = (
+            RunnableLambda(lambda x: x["question"]) 
+            | self.vector_db.as_retriever(search_kwargs={'k': 20})
+            | RunnableLambda(log_retrieved_context) # Log the retrieved context
+        )
         
         # 准备prompt模板
         chat_template = ChatPromptTemplate.from_messages([
@@ -209,19 +273,45 @@ class Chatbot:
             )
         ])
 
+        def log_data_for_llm(data: Any) -> Any:
+            print("\\n===== Data to be sent to LLM =====")
+            try:
+                if hasattr(data, 'to_messages'): # For ChatPromptValue
+                    messages = data.to_messages()
+                    print(f"Number of messages: {len(messages)}")
+                    for i, message in enumerate(messages):
+                        content_snippet = message.content[:1000] + '...' if len(message.content) > 1000 else message.content
+                        print(f"Message {i+1}: Role: {message.type}, Content Snippet:\\n{content_snippet}")
+                elif hasattr(data, 'text'): # For StringPromptValue
+                    print(data.text[:2000] + "..." if len(data.text) > 2000 else data.text)
+                elif isinstance(data, str): # For plain string prompts
+                    print(data[:2000] + "..." if len(data) > 2000 else data)
+                else: # Fallback for other types
+                    print(f"Data type: {type(data)}")
+                    # Attempt to pretty-print if it's a dict or list, otherwise use str()
+                    if isinstance(data, (dict, list)):
+                        print(json.dumps(data, indent=2, ensure_ascii=False, default=str))
+                    else:
+                        print(str(data)[:2000] + "..." if len(str(data)) > 2000 else str(data))
+            except Exception as e:
+                print(f"Error logging data for LLM: {e}")
+                print(f"Raw data: {data}")
+            print("===== End Data to be sent to LLM =====\\n")
+            return data
+
         review_chain = (
             RunnableMap({
-                "history": RunnablePassthrough(lambda _: self.memory.load_memory_variables({})),
+                "history": RunnableLambda(lambda _: self.memory.load_memory_variables({}).get("history", [])), # Ensure history is a list
                 "context": reviews_retriever,
-                "question": RunnablePassthrough(),
+                "question": RunnableLambda(lambda x: x["question"]), # Pass question explicitly
                 "user_preference": RunnableLambda(lambda _: format_user_preference(self._load_user_preference())),
                 "preference_scores": RunnableLambda(lambda _: extract_preference_vars(self._load_user_preference())["preference_scores"]),
                 "preferred_cuisines": RunnableLambda(lambda _: extract_preference_vars(self._load_user_preference()).get("preferred_cuisines", [])),
                 "disliked_cuisines": RunnableLambda(lambda _: extract_preference_vars(self._load_user_preference()).get("disliked_cuisines", [])),
                 "budget_range": RunnableLambda(lambda _: extract_preference_vars(self._load_user_preference()).get("budget_range", "未设置")),
-                "special_requirements": RunnableLambda(lambda _: extract_preference_vars(self._load_user_preference()).get("special_requirements", "无"))
-            })
+                "special_requirements": RunnableLambda(lambda _: extract_preference_vars(self._load_user_preference()).get("special_requirements", "无"))            })
             | chat_template
+            | RunnableLambda(log_data_for_llm) # Log data before sending to LLM
             | self.llm
             | StrOutputParser()
         )
@@ -234,18 +324,28 @@ def init_models():
     
     # 加载环境变量
     load_dotenv()
-    if not os.environ.get("DEEPSEEK_API_KEY"):
-        os.environ["DEEPSEEK_API_KEY"] = getpass.getpass("请输入 DeepSeek-AI API key: ")
-    
-    # 初始化LLM
+    api_key = os.environ.get("DEEPSEEK_API_KEY")
+    base_url = os.environ.get("DEEPSEEK_BASE_URL")
+    model_name = os.environ.get("DEEPSEEK_MODEL_V3") # 使用 DEEPSEEK_MODEL_V3
+
+    if not api_key:
+        api_key = getpass.getpass("未找到DEEPSEEK_API_KEY, 请输入 DeepSeek-AI API key: ")
+    if not base_url:
+        print("警告: 未设置DEEPSEEK_BASE_URL环境变量，将使用默认值 'https://api.deepseek.com'")
+        base_url = "https://api.deepseek.com"
+    if not model_name:
+        print(f"警告: 未设置DEEPSEEK_MODEL_V3环境变量，将使用默认值 'deepseek-chat'")
+        model_name = "deepseek-chat"
+      # 初始化LLM
     try:
         llm = ChatOpenAI(
-            openai_api_key=os.environ["DEEPSEEK_API_KEY"],
-            openai_api_base="https://api.deepseek.com/v1",
-            model_name="deepseek-reasoner",
+            openai_api_key=api_key,
+            openai_api_base=base_url, # 使用从 .env 读取的 base_url
+            model_name=model_name,    # 使用从 .env 读取的 model_name
             temperature=0.7,
-            request_timeout=30,  # 30秒超时
+            request_timeout=120,  # 从 30 修改为 120
             max_retries=3,      # 最多重试3次
+            streaming=True      # 启用流式处理
         )
     except Exception as e:
         print(f"初始化LLM时出错: {str(e)}")
@@ -267,9 +367,7 @@ def init_models():
         )
     except Exception as e:
         print(f"初始化嵌入模型时出错: {str(e)}")
-        raise
-    
-    # 加载向量库
+        raise    # 加载向量库
     vector_db = FAISS.load_local(
         folder_path=FAISS_REVIEWS_PATH_COSINE,
         embeddings=embedding_model,
@@ -539,10 +637,10 @@ def setup_chain(llm, vector_db):
     ])
     
     reviews_retriever = RunnableLambda(lambda x: x["question"]) | vector_db.as_retriever(search_kwargs={'k': 20,})
-
+    
     review_chain = (
         RunnableMap({
-            "history": RunnablePassthrough(lambda _: memory.load_memory_variables({})),
+            "history": RunnablePassthrough(lambda _: memory.load_memory_variables({}).get("history", [])),
             "context": reviews_retriever,
             "question": RunnablePassthrough(),
             "user_preference": RunnableLambda(lambda x: format_user_preference(user_preference)),
@@ -569,8 +667,7 @@ def main():
     # 采集用户偏好
     global user_preference
     user_preference = collect_user_profile()
-    
-    # 设置对话链和记忆
+      # 设置对话链和记忆
     review_chain, memory = setup_chain(llm, vector_db)
     
     # 开始对话
@@ -588,7 +685,7 @@ def main():
         
         try:
             response = review_chain.invoke(input_data)
-            memory.save_context({"input": question}, {"output": response})
+            memory.save_context({"question": question}, {"answer": response})
             print("\n=== 推荐结果 ===")
             print(response)
         except Exception as e:
